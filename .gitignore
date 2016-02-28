@@ -1,0 +1,13 @@
+/target
+.classpath
+.cache
+.project
+.settings/
+project/project/
+project/target/
+/bin
+.idea/
+.idea_modules/
+*/target
+.ensime
+.ensime_cache/
