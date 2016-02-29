@@ -16,3 +16,13 @@ Usage
 -----
 
 **TODO**
+
+
+TODO List
+-------
+
+- Abstract single function tests out to be re-used w/ validatePassword
+- Check/Failure for whitespace character in passwords (or start/end of passwords)
+- Regexes enforcing Owasp standards (enforcing character class uses)
+- Regexes preventing the most commons patterns of passwords (see video/linked articles)
+- Allowing loading of lists of most widely used passwords on internet
