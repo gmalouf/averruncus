@@ -7,21 +7,11 @@ import scalaz.{ Applicative, NonEmptyList, Validation, ValidationNel }
 object Rules {
   type StringNel = NonEmptyList[String]
 
-  def minLengthError(min: Int) =
-    s"Password must contain at least ${min} characters"
+  def minLength[E: ErrorProvider](min: Int): Rule[E, String] =
+    Rule(ErrorProvider[E].minLengthError(min), (_: String).length >= min)
 
-  def minLengthE(min: Int)(error: String = minLengthError(min)): Rule[String, StringNel] =
-    Rule(NonEmptyList(error), (_: String).length >= min)
-
-  def maxLengthError(max: Int) =
-    s"Password cannot contain more than ${max} characters"
-
-  def maxLengthE(max: Int)(error: String = maxLengthError(max)): Rule[String, StringNel] =
-    Rule(NonEmptyList(error), (_: String).length <= max)
-
-  //convenience
-  def minLength(min: Int) = minLengthE(min)()
-  def maxLength(max: Int) = maxLengthE(max)()
+  def maxLength[E: ErrorProvider](max: Int): Rule[E, String] =
+    Rule(ErrorProvider[E].maxLengthError(max), (_: String).length <= max)
 }
 
 trait PasswordValidator {
@@ -47,12 +37,14 @@ object PasswordValidator extends PasswordValidator {
   }
 
   type PasswordValidation[A] = ValidationNel[String, A]
-  type Runner[G[_]] = RuleRunner.Runner[Boolean, Rules.StringNel, G]
+  type Runner[E, G[_]] = RuleRunner.Runner[Boolean, E, G]
 
-  def validate[G[_]: Applicative](rules: Rule[String, Rules.StringNel]*)(pw: String)(
+  def validate[E: ErrorProvider, G[_]: Applicative](rules: Rule[E, String]*)(
+    pw: String
+  )(
     implicit
-    runner: Runner[G]
+    runner: Runner[E, G]
   ): G[Unit] =
-    RuleRunner.run[String, Rules.StringNel, G](rules: _*)(pw)
+    RuleRunner.run[E, String, G](rules: _*)(pw)
 
 }
