@@ -7,7 +7,7 @@ import org.specs2.matcher.ValidationMatchers
 import org.specs2.mutable.Specification
 
 class PasswordValidatorSpec extends Specification with ScalaCheck with ValidationMatchers {
-  import PasswordValidator._
+  import password.PasswordValidator._
 
   "The validateMinLength function" should {
     "return a success when the password meets requirements" >> prop {
