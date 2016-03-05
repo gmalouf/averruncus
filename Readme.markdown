@@ -3,6 +3,8 @@ Averruncus
 
 Averruncus is a library for validating that a password meets a high standard of security.  It is implemented in Scala, though the approach should be transferrable to many other languages.
 
+[![Circle CI](https://circleci.com/gh/gmalouf/averruncus.svg?style=svg)](https://circleci.com/gh/gmalouf/averruncus)
+
 Inspiration
 -----------
 
@@ -21,8 +23,6 @@ Usage
 TODO List
 -------
 
-- Abstract single function specs out to be re-used to test validatePassword() 
-- Check/Failure for whitespace character in passwords (or at least start/end of passwords)
 - Accept username/email address optionally and check that variations of it are not contained in password
 - Regexes enforcing Owasp standards (enforcing character class uses)
 - Regexes preventing the most commons patterns of passwords i.e. 'Broncos1!' style (see video/linked articles)
