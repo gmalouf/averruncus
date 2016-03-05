@@ -34,3 +34,5 @@ lazy val root = (project in file(".")).
 
     libraryDependencies ++= dependencies
   )
+
+coverageExcludedPackages := "com.garymalouf.averruncus.password.example.*"

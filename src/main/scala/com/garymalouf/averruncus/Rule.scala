@@ -5,11 +5,11 @@ import scalaz.Applicative
 
 object Rule {
 
-  def run[I, E, G[_]: Applicative](rule: Rule[I, E])(in: I)(
+  def run[E, I, G[_]: Applicative](rule: Rule[E, I])(in: I)(
     implicit
     r: RuleRunner.Runner[Boolean, E, G]
   ): G[Unit] =
     r(rule.run(in), rule.error)
 }
 
-case class Rule[I, E](error: E, run: I => Boolean)
+case class Rule[E, I](error: E, run: I => Boolean)

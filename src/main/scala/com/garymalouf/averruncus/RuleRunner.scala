@@ -22,7 +22,7 @@ object RuleRunner {
 
   type Runner[I, E, G[_]] = (I, E) => G[Unit]
 
-  def run[I, E, G[_]: Applicative](rules: Rule[I, E]*)(in: I)(
+  def run[E, I, G[_]: Applicative](rules: Rule[E, I]*)(in: I)(
     implicit
     r: Runner[Boolean, E, G]
   ): G[Unit] =
