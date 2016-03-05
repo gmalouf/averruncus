@@ -1,6 +1,7 @@
-package com.garymalouf.averruncus.password
+package com.garymalouf.averruncus.password.example
 
 import com.garymalouf.averruncus.password.ErrorProviders._
+import com.garymalouf.averruncus.password.PasswordValidator
 import com.garymalouf.averruncus.password.PasswordValidator.PasswordValidation
 import com.garymalouf.averruncus.password.Rules._
 import com.garymalouf.averruncus.runners._
