@@ -2,57 +2,72 @@ package com.garymalouf.averruncus.password
 
 import com.garymalouf.averruncus.{ Rule, RuleRunner }
 import scala.language.higherKinds
+import scala.util.matching.Regex
 import scalaz.{ Applicative, NonEmptyList, Validation, ValidationNel }
 
 object Rules {
   type StringNel = NonEmptyList[String]
 
-  def minLengthError(min: Int) =
-    s"Password must contain at least ${min} characters"
+  def minLength[E: ErrorProvider](min: Int): Rule[E, String] =
+    Rule(ErrorProvider[E].minLengthError(min), (_: String).length >= min)
 
-  def minLengthE(min: Int)(error: String = minLengthError(min)): Rule[String, StringNel] =
-    Rule(NonEmptyList(error), (_: String).length >= min)
+  def maxLength[E: ErrorProvider](max: Int): Rule[E, String] =
+    Rule(ErrorProvider[E].maxLengthError(max), (_: String).length <= max)
 
-  def maxLengthError(max: Int) =
-    s"Password cannot contain more than ${max} characters"
+  def reTest[E: ErrorProvider](e: E, r: Regex): Rule[E, String] =
+    Rule(e, (s: String) => r.findFirstIn(s).nonEmpty)
 
-  def maxLengthE(max: Int)(error: String = maxLengthError(max)): Rule[String, StringNel] =
-    Rule(NonEmptyList(error), (_: String).length <= max)
+  val upperR = "(?=.*[A-Z])".r
 
-  //convenience
-  def minLength(min: Int) = minLengthE(min)()
-  def maxLength(max: Int) = maxLengthE(max)()
+  def hasUpper[E: ErrorProvider]: Rule[E, String] =
+    reTest(ErrorProvider[E].hasUpper, upperR)
+
+  val lowerR = "(?=.*[a-z])".r
+
+  def hasLower[E: ErrorProvider]: Rule[E, String] =
+    reTest(ErrorProvider[E].hasLower, lowerR)
+
+  val numR = "(?=.*[0-9])".r
+
+  def hasNumeric[E: ErrorProvider]: Rule[E, String] =
+    reTest(ErrorProvider[E].hasNumeric, numR)
+
+  val symR = """(?=.*[\W])""".r
+
+  def hasSymbol[E: ErrorProvider]: Rule[E, String] =
+    reTest(ErrorProvider[E].hasSymbol, symR)
+
+  val wsR = """^\S*$""".r
+
+  def noWhitespace[E: ErrorProvider]: Rule[E, String] =
+    reTest(ErrorProvider[E].noWhitespace, wsR)
 }
 
-trait PasswordValidator {
-  import scalaz.syntax.std.boolean._
-
-  def validateMinLength(requiredMinLength: Int)(password: String): Validation[String, Unit] =
-    (password.length >= requiredMinLength).either(()).or(s"Password must contain at " +
-      s"least $requiredMinLength characters").validation
-
-  def validateMaxLength(requiredMaxLength: Int)(password: String): Validation[String, Unit] =
-    (password.length <= requiredMaxLength).either(()).or(s"Password cannot contain more than " +
-      s"$requiredMaxLength characters").validation
-}
-
-import scalaz.syntax.traverse1._
-import scalaz.std.list._
-object PasswordValidator extends PasswordValidator {
-  //TODO: Combinations based on configuration
-  def validatePassword(minPasswordLength: Int = 10, maxPasswordLength: Int = 50)(password: String): ValidationNel[String, Unit] = {
-    val checks = List(validateMinLength(minPasswordLength) _, validateMaxLength(maxPasswordLength) _)
-
-    checks.map(_.apply(password).toValidationNel).sequenceU.map(_ => Unit)
-  }
+object PasswordValidator {
 
   type PasswordValidation[A] = ValidationNel[String, A]
-  type Runner[G[_]] = RuleRunner.Runner[Boolean, Rules.StringNel, G]
+  type Runner[E, G[_]] = RuleRunner.Runner[Boolean, E, G]
 
-  def validate[G[_]: Applicative](rules: Rule[String, Rules.StringNel]*)(pw: String)(
+  def validate[E: ErrorProvider, G[_]: Applicative](rules: Rule[E, String]*)(
+    pw: String
+  )(
     implicit
-    runner: Runner[G]
+    runner: Runner[E, G]
   ): G[Unit] =
-    RuleRunner.run[String, Rules.StringNel, G](rules: _*)(pw)
+    RuleRunner.run[E, String, G](rules: _*)(pw)
 
+  def validateAll[E: ErrorProvider, G[_]: Applicative](min: Int, max: Int)(
+    pw: String
+  )(
+    implicit
+    runner: Runner[E, G]
+  ): G[Unit] =
+    validate[E, G](
+      Rules.minLength[E](min),
+      Rules.maxLength[E](max),
+      Rules.hasUpper[E],
+      Rules.hasLower[E],
+      Rules.hasNumeric[E],
+      Rules.hasSymbol[E]
+    )(pw)
 }
