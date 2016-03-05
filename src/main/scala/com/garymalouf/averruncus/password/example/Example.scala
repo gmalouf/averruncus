@@ -5,13 +5,20 @@ import com.garymalouf.averruncus.password.PasswordValidator
 import com.garymalouf.averruncus.password.PasswordValidator.PasswordValidation
 import com.garymalouf.averruncus.password.Rules._
 import com.garymalouf.averruncus.runners._
-import scalaz.{ \/, NonEmptyList, Validation }
+import scalaz.{ \/, NonEmptyList, Semigroup, Validation }
 import scalaz.std.option._
-import scalaz.std.string._
 
 object Example extends App {
 
+  val scapp: (String, => String) => String =
+    (s1, s2) => s"${s1}, ${s2}"
+  implicit val ssg =
+    Semigroup.instance(scapp)
+
   //totally ridiculous contrived example to show accumulation
+  val pwva =
+    PasswordValidator.validateAll[StringNel, PasswordValidation](3, 1)("pw")
+
   val pwv =
     PasswordValidator.validate[StringNel, PasswordValidation](
       minLength(3),
@@ -44,6 +51,7 @@ object Example extends App {
       minLength(3), maxLength(5)
     )("pass")
 
+  println(pwva)
   println(pwv)
   println(pwsv)
   println(pdj)

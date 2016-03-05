@@ -5,6 +5,11 @@ import scalaz.NonEmptyList
 trait ErrorProvider[E] {
   def minLengthError(min: Int): E
   def maxLengthError(max: Int): E
+  val hasUpper: E
+  val hasLower: E
+  val hasNumeric: E
+  val hasSymbol: E
+  val noWhitespace: E
 }
 
 object ErrorProvider {
@@ -18,6 +23,16 @@ object ErrorProviders {
       s"Password must contain at least ${min} characters"
     def maxLengthError(max: Int) =
       s"Password cannot contain more than ${max} characters"
+    val hasUpper =
+      "Password must contain at least one uppercase character"
+    val hasLower =
+      "Password must contain at least one lowercase character"
+    val hasNumeric =
+      "Password must contain at least one numeric character"
+    val hasSymbol =
+      "Password must contain at least one non-alphanumeric character"
+    val noWhitespace =
+      "Password must not contain any whitespace characters"
   }
 
   implicit val stringNel = new ErrorProvider[Rules.StringNel] {
@@ -25,5 +40,15 @@ object ErrorProviders {
       NonEmptyList(string.minLengthError(min))
     def maxLengthError(max: Int) =
       NonEmptyList(string.maxLengthError(max))
+    val hasUpper =
+      NonEmptyList(string.hasUpper)
+    val hasLower =
+      NonEmptyList(string.hasLower)
+    val hasNumeric =
+      NonEmptyList(string.hasNumeric)
+    val hasSymbol =
+      NonEmptyList(string.hasSymbol)
+    val noWhitespace =
+      NonEmptyList(string.noWhitespace)
   }
 }
