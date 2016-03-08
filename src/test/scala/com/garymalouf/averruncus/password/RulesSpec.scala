@@ -96,7 +96,7 @@ class RulesSpec extends Specification with ScalaCheck {
       }
   }
 
-  "The blah rule" should {
+  "The limitConsecutiveIdenticalCharacters rule" should {
     val posTestCases = List("ThiIsNotSmee", "aabababababa", "HelppNNow!")
 
     val negTestCases = List("HHHelpMe!", "dumpppDrumpf!", "It'sALongDayyy")
