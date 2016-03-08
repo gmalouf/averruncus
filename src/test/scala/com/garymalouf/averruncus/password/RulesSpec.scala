@@ -5,6 +5,7 @@ import org.scalacheck.Gen
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.forAll
 import org.specs2.ScalaCheck
+import org.specs2.execute.Result
 import org.specs2.mutable.Specification
 import scalaz.syntax.id._
 
@@ -93,5 +94,22 @@ class RulesSpec extends Specification with ScalaCheck {
         val wws = inject(si._1, si._2, List.fill(l)(" ").mkString)
         Rules.noWhitespace[Rules.StringNel].run(wws) must beFalse
       }
+  }
+
+  "The limitConsecutiveIdenticalCharacters rule" should {
+    val posTestCases = List("ThiIsNotSmee", "aabababababa", "HelppNNow!")
+
+    val negTestCases = List("HHHelpMe!", "dumpppDrumpf!", "It'sALongDayyy")
+    "return true if pw does not have 3+ consecutive, identical characters" >> {
+      Result.foreach(posTestCases) { pw =>
+        Rules.limitConsecutiveIdenticalCharacters[Rules.StringNel].run(pw) must beTrue
+      }
+    }
+
+    "return false if pw has 3+ consecutive, identical characters" >> {
+      Result.foreach(negTestCases) { pw =>
+        Rules.limitConsecutiveIdenticalCharacters[Rules.StringNel].run(pw) must beFalse
+      }
+    }
   }
 }

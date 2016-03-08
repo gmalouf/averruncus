@@ -24,9 +24,9 @@ TODO List
 -------
 
 - Accept username/email address optionally and check that variations of it are not contained in password
-- Regexes enforcing Owasp standards (enforcing character class uses)
-- Regexes preventing the most commons patterns of passwords i.e. 'Broncos1!' style (see video/linked articles)
-- Allowing loading of lists of most widely used passwords on internet to be blacklisted
+- Regexes preventing the most commons topologies of passwords i.e. 'Broncos1!' style (see video/linked articles)
+- Min topology change between old/new passwords
+- Allowing loading of lists of most widely used passwords on internet to be explicitly blacklisted
 
 Relevant Posts/Articles
 ---------------------
