@@ -14,33 +14,39 @@ object Rules {
   def maxLength[E: ErrorProvider](max: Int): Rule[E, String] =
     Rule(ErrorProvider[E].maxLengthError(max), (_: String).length <= max)
 
-  def reTest[E: ErrorProvider](e: E, r: Regex): Rule[E, String] =
+  def regexPosTest[E: ErrorProvider](e: E, r: Regex): Rule[E, String] =
     Rule(e, (s: String) => r.findFirstIn(s).nonEmpty)
 
   val upperR = "(?=.*[A-Z])".r
 
   def hasUpper[E: ErrorProvider]: Rule[E, String] =
-    reTest(ErrorProvider[E].hasUpper, upperR)
+    regexPosTest(ErrorProvider[E].hasUpper, upperR)
 
   val lowerR = "(?=.*[a-z])".r
 
   def hasLower[E: ErrorProvider]: Rule[E, String] =
-    reTest(ErrorProvider[E].hasLower, lowerR)
+    regexPosTest(ErrorProvider[E].hasLower, lowerR)
 
   val numR = "(?=.*[0-9])".r
 
   def hasNumeric[E: ErrorProvider]: Rule[E, String] =
-    reTest(ErrorProvider[E].hasNumeric, numR)
+    regexPosTest(ErrorProvider[E].hasNumeric, numR)
 
   val symR = """(?=.*[\W])""".r
 
   def hasSymbol[E: ErrorProvider]: Rule[E, String] =
-    reTest(ErrorProvider[E].hasSymbol, symR)
+    regexPosTest(ErrorProvider[E].hasSymbol, symR)
 
   val wsR = """^\S*$""".r
 
   def noWhitespace[E: ErrorProvider]: Rule[E, String] =
-    reTest(ErrorProvider[E].noWhitespace, wsR)
+    regexPosTest(ErrorProvider[E].noWhitespace, wsR)
+
+  val dcR = """(.)\1\1+""".r
+  // Ensures that the same character does not show up 3 times in a row or more
+  def limitConsecutiveIdenticalCharacters[E: ErrorProvider]: Rule[E, String] =
+    Rule(ErrorProvider[E].consecIdenticalCharsError, dcR.findFirstIn(_).isEmpty)
+
 }
 
 object PasswordValidator {
@@ -56,18 +62,20 @@ object PasswordValidator {
   ): G[Unit] =
     RuleRunner.run[E, String, G](rules: _*)(pw)
 
-  def validateAll[E: ErrorProvider, G[_]: Applicative](min: Int, max: Int)(
+  def validateAll[E: ErrorProvider, G[_]: Applicative](minLength: Int, maxLength: Int)(
     pw: String
   )(
     implicit
     runner: Runner[E, G]
   ): G[Unit] =
     validate[E, G](
-      Rules.minLength[E](min),
-      Rules.maxLength[E](max),
+      Rules.minLength[E](minLength),
+      Rules.maxLength[E](maxLength),
       Rules.hasUpper[E],
       Rules.hasLower[E],
       Rules.hasNumeric[E],
-      Rules.hasSymbol[E]
+      Rules.hasSymbol[E],
+      Rules.noWhitespace[E],
+      Rules.limitConsecutiveIdenticalCharacters[E]
     )(pw)
 }

@@ -10,6 +10,7 @@ trait ErrorProvider[E] {
   val hasNumeric: E
   val hasSymbol: E
   val noWhitespace: E
+  val consecIdenticalCharsError: E
 }
 
 object ErrorProvider {
@@ -20,9 +21,9 @@ object ErrorProviders {
 
   implicit val string = new ErrorProvider[String] {
     def minLengthError(min: Int) =
-      s"Password must contain at least ${min} characters"
+      s"Password must contain at least $min characters"
     def maxLengthError(max: Int) =
-      s"Password cannot contain more than ${max} characters"
+      s"Password cannot contain more than $max characters"
     val hasUpper =
       "Password must contain at least one uppercase character"
     val hasLower =
@@ -33,6 +34,8 @@ object ErrorProviders {
       "Password must contain at least one non-alphanumeric character"
     val noWhitespace =
       "Password must not contain any whitespace characters"
+    val consecIdenticalCharsError =
+      "Password must not contain more than 3 identical characters in a row"
   }
 
   implicit val stringNel = new ErrorProvider[Rules.StringNel] {
@@ -50,5 +53,7 @@ object ErrorProviders {
       NonEmptyList(string.hasSymbol)
     val noWhitespace =
       NonEmptyList(string.noWhitespace)
+    val consecIdenticalCharsError =
+      NonEmptyList(string.consecIdenticalCharsError)
   }
 }
